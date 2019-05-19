@@ -1,0 +1,39 @@
+
+/*paddings*/
+.p5{
+	padding: 2em;
+}
+.p1{
+	padding: .5em;
+}
+.padding-top-5{
+	padding-top: 2em !important;
+}
+.padding-top-2{
+	padding-top: .7em !important;
+}
+/*botones*/
+.btn-block{
+	width: 100%;
+}
+/*colores*/
+.color-cut{
+	background-color: #20172f !important;
+}
+
+.fondo{
+	background-clip: 
+}
+.white-text{
+	color:white !important;
+}.green-text{
+	color:green;
+}
+.img-height{
+	height: 11em;
+}
+.bottom{
+	position:fixed;
+	 bottom:0;
+	 left: 0;
+}

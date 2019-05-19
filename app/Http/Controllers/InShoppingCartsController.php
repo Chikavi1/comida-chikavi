@@ -47,11 +47,14 @@ class InShoppingCartsController extends Controller
     return redirect()->route('revision');
    }
 
-   public function payment()
+   public function payment(Request $request)
    {
+
      $user = User::find(Auth::user()->id);
      $cart = \Session::get('cart');
-    return view('pago')->with(compact('cart','user'));
+     \Session::put('direccion',$request->oculto);
+     $direccion = \Session::get('direccion');
+    return view('pago')->with(compact('cart','user','direccion'));
    }
   
   public function finish_payment()

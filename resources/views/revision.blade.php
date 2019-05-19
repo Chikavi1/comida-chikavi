@@ -1,23 +1,98 @@
-version estable en php
-
 @extends('layouts.app')
 <?php  $total = 0;$cantidad = 0;
 ?>
 <style>
-  #map {
-        height: 90%;
+    
+      #map {
+        height: 100%;
       }
-      /* Optional: Makes the sample page fill the window. */
       html, body {
         height: 100%;
         margin: 0;
         padding: 0;
       }
-</style>
+      #description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
 
+      #infowindow-content .title {
+        font-weight: bold;
+      }
 
+      #infowindow-content {
+        display: none;
+      }
 
-<script
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #address {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+       #btns {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 50px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 30px;
+      }
+
+      #address:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+    </style>
+  <script
   src="https://code.jquery.com/jquery-3.4.0.js"
   integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
   crossorigin="anonymous"></script>
@@ -30,6 +105,8 @@ version estable en php
     $('.modal').modal();
   });
 </script>
+
+
 @section('content')
 <div class="row">
     <div class="col m3">
@@ -46,7 +123,11 @@ version estable en php
       </div>
       <div class="col s6">
         @if($bandera)
-        <a href="{{ route('pago') }}" class="btn btn-block green darken-4">siguiente</a>
+        <form action="{{ route('pago') }}" method="get">
+           {{ csrf_field() }}
+          <input type="hidden" id="oculto" name="oculto">
+          <input type="submit" class="btn btn-block green darken-4" value="siguiente">
+        </form>
         @endif
       </div>
     </div>
@@ -116,14 +197,16 @@ version estable en php
 
              
             </table>
+             
+                
+             <input id="address" class="controls" type="text" placeholder="Introduce tu direccion" required>
+             
+    <div id="map"></div>
         </div>
-
-       <div id="map"></div>
-
-
       </div>
     </div>
 </div>
+
 <div class="row">
   <div class="col m3">
     
@@ -159,63 +242,88 @@ version estable en php
       </form>
     </div>
 
-
-
-
-
-
-    <script>
-        function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 4,
-          center: {lat: 23.3134142, lng: -111.6559662}  // mexico.
-        });
-
-        var directionsService = new google.maps.DirectionsService;
-        var directionsDisplay = new google.maps.DirectionsRenderer({
-          draggable: true,
-          map: map,
-          panel: document.getElementById('right-panel')
-        });
-
-        directionsDisplay.addListener('directions_changed', function() {
-          computeTotalDistance(directionsDisplay.getDirections());
-        });
-
-        displayRoute('CUTonalá, Nuevo Periférico Oriente, Tateposco, Tonalá, Jal.','Lomas de San Miguel, San Pedro Tlaquepaque, Jal.', directionsService,
-            directionsDisplay);
-      }
-
-      function displayRoute(origin, destination, service, display) {
-        service.route({
-          origin: origin,
-          destination: destination,
-        
-          travelMode: 'DRIVING',
-          avoidTolls: true
-        }, function(response, status) {
-          if (status === 'OK') {
-            display.setDirections(response);
-          } else {
-            alert('Could not display directions due to: ' + status);
-          }
-        });
-      }
-
-      function computeTotalDistance(result) {
-        var total = 0;
-        var myroute = result.routes[0];
-        for (var i = 0; i < myroute.legs.length; i++) {
-          total += myroute.legs[i].distance.value;
-        }
-        total = total / 1000;
-        document.getElementById('total').innerHTML = total + ' km';
-      }
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOlpW1fYkGXKr6K4ZzU7j1VTO4DCcrueI&callback=initMap">
-    </script>
 </div>
 
+    
+    <script>
+     
+     
+var valor=document.getElementById("address").value;
+      function initAutocomplete() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 20.6019326, lng: -103.3194292},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+        });
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('address');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          console.log(valor);
+          searchBox.setBounds(map.getBounds());
+        });
+
+        var markers = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+              map: map,
+              icon: icon,
+              title: place.name,
+              position: place.geometry.location
+            }));
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              
+              document.getElementById("oculto").value = document.getElementById("address").value;
+              console.log(document.getElementById("oculto").value)
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOlpW1fYkGXKr6K4ZzU7j1VTO4DCcrueI&libraries=places&callback=initAutocomplete"
+         async defer></script>
+  </body>
+</html>
 
 @endsection
